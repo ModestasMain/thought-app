@@ -1,25 +1,31 @@
-# Thought App
+# Thought App - React Native
 
-A mobile-first motivational quotes app where users can share and discover inspiring thoughts.
+A React Native app built with Expo SDK 53 for sharing and discovering motivational thoughts.
 
 ## Features
 
-- 📱 Mobile-optimized design with touch-friendly interactions
-- ✨ Create and share motivational thoughts
-- 🔍 Search and filter thoughts by tags
-- ❤️ Like and share thoughts
-- 🏷️ Tag-based organization
-- 📱 PWA-ready with mobile app capabilities
+- Create and share thoughts with tags
+- Like and share thoughts
+- Search and filter by tags
+- Infinite scroll for loading more thoughts
+- Modern mobile-first UI design
 
 ## Tech Stack
 
-- React 18 with TypeScript
-- Tailwind CSS for mobile-first styling
-- Lucide React for icons
-- Date-fns for date formatting
-- Mobile-optimized components and interactions
+- React Native 0.76.3
+- Expo SDK 53
+- TypeScript
+- Expo Router for navigation
+- React Native Reanimated for animations
 
-## Getting Started
+## Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+- Expo CLI (`npm install -g @expo/cli`)
+- Expo Go app on your mobile device
+
+## Setup
 
 1. Install dependencies:
 ```bash
@@ -31,39 +37,43 @@ npm install
 npm start
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser
+3. Scan the QR code with Expo Go app on your device
 
-## Mobile Features
+## Development
 
-- Touch-optimized buttons (44px minimum height)
-- Safe area support for notched devices
-- Swipe gestures and long-press interactions
-- Mobile-first responsive design
-- PWA manifest for app-like experience
-
-## Build for Production
-
-```bash
-npm run build
-```
+- `npm start` - Start Expo development server
+- `npm run android` - Start on Android emulator
+- `npm run ios` - Start on iOS simulator
+- `npm run web` - Start web version
 
 ## Project Structure
 
 ```
-src/
-├── components/          # React components
-│   ├── ThoughtCard.tsx # Individual thought display
-│   └── CreateThought.tsx # Create new thought modal
-├── types/              # TypeScript type definitions
-├── App.tsx            # Main application component
-├── index.tsx          # React entry point
-└── index.css          # Global styles with Tailwind
+├── app/                 # Expo Router screens
+│   ├── _layout.tsx     # Root layout
+│   └── index.tsx       # Main app screen
+├── src/
+│   ├── components/     # React Native components
+│   │   ├── ThoughtCard.tsx
+│   │   └── CreateThought.tsx
+│   └── types/          # TypeScript type definitions
+├── assets/             # Images, fonts, icons
+└── package.json        # Dependencies and scripts
 ```
 
-## Mobile Considerations
+## Assets Required
 
-- Optimized for portrait orientation
-- Touch-friendly spacing and sizing
-- Fast animations (200-300ms)
-- Minimal scrolling and efficient layouts
-- Native sharing capabilities
+Before running, you'll need to add these assets:
+- `assets/icon.png` (1024x1024)
+- `assets/splash.png` (1242x2436)
+- `assets/adaptive-icon.png` (1024x1024)
+- `assets/favicon.png` (48x48)
+- `assets/fonts/Inter-Bold.ttf`
+- `assets/fonts/Inter-Regular.ttf`
+
+## Building for Production
+
+```bash
+expo build:android  # Build APK
+expo build:ios      # Build iOS app
+```

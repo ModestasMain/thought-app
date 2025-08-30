@@ -1,160 +1,269 @@
 import React, { useState } from 'react';
-import { Plus, X, Hash } from 'lucide-react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { CreateThoughtData } from '../types';
 
 interface CreateThoughtProps {
+  isVisible: boolean;
   onSubmit: (data: CreateThoughtData) => void;
   onCancel: () => void;
-  isVisible: boolean;
 }
 
-const CreateThought: React.FC<CreateThoughtProps> = ({ onSubmit, onCancel, isVisible }) => {
+export default function CreateThought({ isVisible, onSubmit, onCancel }: CreateThoughtProps) {
   const [content, setContent] = useState('');
   const [author, setAuthor] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (content.trim() && author.trim()) {
-      onSubmit({ content: content.trim(), author: author.trim(), tags });
-      resetForm();
+  const handleSubmit = () => {
+    if (!content.trim() || !author.trim()) {
+      Alert.alert('Error', 'Please fill in all required fields');
+      return;
     }
-  };
 
-  const resetForm = () => {
+    onSubmit({
+      content: content.trim(),
+      author: author.trim(),
+      tags: tags,
+    });
+
     setContent('');
     setAuthor('');
     setTags([]);
     setTagInput('');
   };
 
-  const addTag = () => {
-    const tag = tagInput.trim();
+  const handleAddTag = () => {
+    const tag = tagInput.trim().toLowerCase();
     if (tag && !tags.includes(tag)) {
       setTags([...tags, tag]);
       setTagInput('');
     }
   };
 
-  const removeTag = (tagToRemove: string) => {
+  const handleRemoveTag = (tagToRemove: string) => {
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
-      e.preventDefault();
-      addTag();
-    }
+  const handleCancel = () => {
+    setContent('');
+    setAuthor('');
+    setTags([]);
+    setTagInput('');
+    onCancel();
   };
 
-  if (!isVisible) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50 animate-fade-in">
-      <div className="bg-white rounded-t-3xl w-full max-w-md max-h-[90vh] overflow-hidden animate-slide-up">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Share a Thought</h2>
-          <button
-            onClick={onCancel}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <X className="w-6 h-6 text-gray-500" />
-          </button>
-        </div>
+    <Modal
+      visible={isVisible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+    >
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleCancel} style={styles.cancelButton}>
+            <Text style={styles.cancelText}>Cancel</Text>
+          </TouchableOpacity>
+          
+          <Text style={styles.title}>New Thought</Text>
+          
+          <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
+            <Text style={styles.submitText}>Post</Text>
+          </TouchableOpacity>
+        </View>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Your Name
-            </label>
-            <input
-              type="text"
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Author</Text>
+            <TextInput
+              style={styles.input}
               value={author}
-              onChange={(e) => setAuthor(e.target.value)}
-              className="input-field"
-              placeholder="Enter your name"
-              required
+              onChangeText={setAuthor}
+              placeholder="Your name"
+              placeholderTextColor="#9ca3af"
             />
-          </div>
+          </View>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Your Thought
-            </label>
-            <textarea
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Thought</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
               value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="input-field min-h-[120px] resize-none"
-              placeholder="Share your motivational thought..."
-              required
+              onChangeText={setContent}
+              placeholder="Share your thought..."
+              placeholderTextColor="#9ca3af"
+              multiline
+              textAlignVertical="top"
             />
-          </div>
+          </View>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tags (optional)
-            </label>
-            <div className="flex space-x-2 mb-3">
-              <input
-                type="text"
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Tags</Text>
+            <View style={styles.tagInputContainer}>
+              <TextInput
+                style={styles.tagInput}
                 value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className="input-field flex-1"
+                onChangeText={setTagInput}
                 placeholder="Add a tag..."
+                placeholderTextColor="#9ca3af"
+                onSubmitEditing={handleAddTag}
+                returnKeyType="done"
               />
-              <button
-                type="button"
-                onClick={addTag}
-                className="btn-secondary px-4"
-              >
-                <Plus className="w-5 h-5" />
-              </button>
-            </div>
+              <TouchableOpacity onPress={handleAddTag} style={styles.addTagButton}>
+                <Ionicons name="add" size={20} color="white" />
+              </TouchableOpacity>
+            </View>
             
             {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800"
-                  >
-                    <Hash className="w-4 h-4 mr-1" />
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      className="ml-2 hover:text-primary-600"
+              <View style={styles.tagsContainer}>
+                {tags.map(tag => (
+                  <View key={tag} style={styles.tag}>
+                    <Text style={styles.tagText}>{tag}</Text>
+                    <TouchableOpacity
+                      onPress={() => handleRemoveTag(tag)}
+                      style={styles.removeTagButton}
                     >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </span>
+                      <Ionicons name="close" size={16} color="#6b7280" />
+                    </TouchableOpacity>
+                  </View>
                 ))}
-              </div>
+              </View>
             )}
-          </div>
-
-          <div className="flex space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="btn-secondary flex-1"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="btn-primary flex-1"
-              disabled={!content.trim() || !author.trim()}
-            >
-              Share Thought
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </Modal>
   );
-};
+}
 
-export default CreateThought;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f9fafb',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+    backgroundColor: 'white',
+  },
+  cancelButton: {
+    padding: 8,
+  },
+  cancelText: {
+    fontSize: 16,
+    color: '#6b7280',
+    fontFamily: 'System',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1f2937',
+    fontFamily: 'System',
+  },
+  submitButton: {
+    padding: 8,
+  },
+  submitText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#6366f1',
+    fontFamily: 'System',
+  },
+  content: {
+    flex: 1,
+    padding: 16,
+  },
+  inputGroup: {
+    marginBottom: 24,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
+    fontFamily: 'System',
+  },
+  input: {
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#1f2937',
+    fontFamily: 'System',
+  },
+  textArea: {
+    height: 120,
+    paddingTop: 12,
+  },
+  tagInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  tagInput: {
+    flex: 1,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#1f2937',
+    fontFamily: 'System',
+  },
+  addTagButton: {
+    backgroundColor: '#6366f1',
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 12,
+    gap: 8,
+  },
+  tag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f3f4f6',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 6,
+  },
+  tagText: {
+    fontSize: 14,
+    color: '#6b7280',
+    fontWeight: '500',
+    fontFamily: 'System',
+  },
+  removeTagButton: {
+    padding: 2,
+  },
+});
