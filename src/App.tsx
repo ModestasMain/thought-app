@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, Sparkles } from 'lucide-react';
-import ThoughtCard from './components/ThoughtCard';
+import InfiniteScroll from './components/InfiniteScroll';
 import CreateThought from './components/CreateThought';
 import { Thought, CreateThoughtData } from './types';
 
@@ -9,6 +9,7 @@ const App: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [showSearch, setShowSearch] = useState(false);
 
   useEffect(() => {
     loadSampleThoughts();
@@ -41,6 +42,24 @@ const App: React.FC = () => {
         timestamp: new Date('2024-01-13'),
         likes: 56,
         tags: ['belief', 'confidence', 'mindset'],
+        isLiked: false
+      },
+      {
+        id: '4',
+        content: 'The future belongs to those who believe in the beauty of their dreams.',
+        author: 'Eleanor Roosevelt',
+        timestamp: new Date('2024-01-12'),
+        likes: 34,
+        tags: ['dreams', 'future', 'belief'],
+        isLiked: false
+      },
+      {
+        id: '5',
+        content: 'Don\'t watch the clock; do what it does. Keep going.',
+        author: 'Sam Levenson',
+        timestamp: new Date('2024-01-11'),
+        likes: 29,
+        tags: ['persistence', 'time', 'motivation'],
         isLiked: false
       }
     ];
@@ -81,7 +100,32 @@ const App: React.FC = () => {
     }
   };
 
+  const handleLoadMore = () => {
+    const moreThoughts: Thought[] = [
+      {
+        id: (Date.now() + 1).toString(),
+        content: 'The only limit to our realization of tomorrow is our doubts of today.',
+        author: 'Franklin D. Roosevelt',
+        timestamp: new Date('2024-01-10'),
+        likes: 23,
+        tags: ['doubt', 'tomorrow', 'realization'],
+        isLiked: false
+      },
+      {
+        id: (Date.now() + 2).toString(),
+        content: 'What you get by achieving your goals is not as important as what you become by achieving your goals.',
+        author: 'Zig Ziglar',
+        timestamp: new Date('2024-01-09'),
+        likes: 31,
+        tags: ['goals', 'growth', 'achievement'],
+        isLiked: false
+      }
+    ];
+    setThoughts(prev => [...prev, ...moreThoughts]);
+  };
+
   const filteredThoughts = thoughts.filter(thought => {
+    if (!showSearch) return true;
     const matchesSearch = thought.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          thought.author.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTags = selectedTags.length === 0 || 
@@ -92,25 +136,35 @@ const App: React.FC = () => {
   const allTags = Array.from(new Set(thoughts.flatMap(thought => thought.tags)));
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mobile-container">
-        <header className="safe-area-top pt-6 pb-4">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900">Thought App</h1>
+    <div className="h-screen bg-gray-50 overflow-hidden">
+      <header className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-gray-900/80 to-transparent pt-6 pb-4 px-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
+            <h1 className="text-xl font-bold text-white">Thought App</h1>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setShowSearch(!showSearch)}
+              className="p-2 bg-white/20 rounded-full text-white hover:bg-white/30 transition-colors"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+            
             <button
               onClick={() => setShowCreateModal(true)}
-              className="btn-primary p-3 rounded-xl"
+              className="btn-primary p-2 rounded-full"
             >
-              <Plus className="w-6 h-6" />
+              <Plus className="w-5 h-5" />
             </button>
           </div>
+        </div>
 
-          <div className="space-y-4">
+        {showSearch && (
+          <div className="space-y-4 animate-slide-down">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
@@ -118,13 +172,13 @@ const App: React.FC = () => {
                 placeholder="Search thoughts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-field pl-10"
+                className="input-field pl-10 bg-white/90 backdrop-blur-sm"
               />
             </div>
 
             {allTags.length > 0 && (
               <div className="flex items-center space-x-2 overflow-x-auto pb-2">
-                <Filter className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <Filter className="w-5 h-5 text-white flex-shrink-0" />
                 {allTags.map(tag => (
                   <button
                     key={tag}
@@ -136,7 +190,7 @@ const App: React.FC = () => {
                     className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                       selectedTags.includes(tag)
                         ? 'bg-primary-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        : 'bg-white/20 text-white hover:bg-white/30'
                     }`}
                   >
                     {tag}
@@ -145,29 +199,18 @@ const App: React.FC = () => {
               </div>
             )}
           </div>
-        </header>
+        )}
+      </header>
 
-        <main className="pb-20">
-          {filteredThoughts.length === 0 ? (
-            <div className="text-center py-12">
-              <Sparkles className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No thoughts found</h3>
-              <p className="text-gray-500">Try adjusting your search or filters</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredThoughts.map(thought => (
-                <ThoughtCard
-                  key={thought.id}
-                  thought={thought}
-                  onLike={handleLike}
-                  onShare={handleShare}
-                />
-              ))}
-            </div>
-          )}
-        </main>
-      </div>
+      <main className="h-full pt-20">
+        <InfiniteScroll
+          thoughts={filteredThoughts}
+          onLike={handleLike}
+          onShare={handleShare}
+          onLoadMore={handleLoadMore}
+          hasMore={true}
+        />
+      </main>
 
       <CreateThought
         isVisible={showCreateModal}
