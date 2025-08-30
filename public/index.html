@@ -22,16 +22,31 @@
     <div id="root"></div>
     
     <script>
+      console.log('PWA Debug: Starting service worker registration...');
+      
       if ('serviceWorker' in navigator) {
+        console.log('PWA Debug: Service Worker is supported');
+        
         window.addEventListener('load', () => {
+          console.log('PWA Debug: Page loaded, registering service worker...');
+          
           navigator.serviceWorker.register('/sw.js')
             .then((registration) => {
-              console.log('SW registered: ', registration);
+              console.log('PWA Debug: Service Worker registered successfully:', registration);
+              
+              // Check if PWA is installable
+              if ('BeforeInstallPromptEvent' in window) {
+                console.log('PWA Debug: BeforeInstallPromptEvent is supported');
+              } else {
+                console.log('PWA Debug: BeforeInstallPromptEvent is NOT supported');
+              }
             })
             .catch((registrationError) => {
-              console.log('SW registration failed: ', registrationError);
+              console.error('PWA Debug: Service Worker registration failed:', registrationError);
             });
         });
+      } else {
+        console.log('PWA Debug: Service Worker is NOT supported');
       }
     </script>
   </body>
