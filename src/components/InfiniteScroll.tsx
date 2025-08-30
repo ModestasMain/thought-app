@@ -23,6 +23,12 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleSwipeUp = useCallback(() => {
+    if (currentIndex > 0) {
+      setCurrentIndex(prev => prev - 1);
+    }
+  }, [currentIndex]);
+
+  const handleSwipeDown = useCallback(() => {
     if (currentIndex < thoughts.length - 1) {
       setCurrentIndex(prev => prev + 1);
     } else if (hasMore && !isLoading) {
@@ -31,12 +37,6 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
       setTimeout(() => setIsLoading(false), 1000);
     }
   }, [currentIndex, thoughts.length, hasMore, isLoading, onLoadMore]);
-
-  const handleSwipeDown = useCallback(() => {
-    if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
-    }
-  }, [currentIndex]);
 
   const swipeHandlers = useSwipeable({
     onSwipedUp: handleSwipeUp,
@@ -113,7 +113,7 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
         <div className="flex flex-col items-center space-y-2">
           <button
             onClick={handleSwipeUp}
-            disabled={currentIndex >= thoughts.length - 1 && !hasMore}
+            disabled={currentIndex <= 0}
             className="p-2 bg-white bg-opacity-80 rounded-full shadow-lg hover:bg-opacity-100 transition-all disabled:opacity-50"
           >
             <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,7 +123,7 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
           
           <button
             onClick={handleSwipeDown}
-            disabled={currentIndex <= 0}
+            disabled={currentIndex >= thoughts.length - 1 && !hasMore}
             className="p-2 bg-white bg-opacity-80 rounded-full shadow-lg hover:bg-opacity-100 transition-all disabled:opacity-50"
           >
             <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
