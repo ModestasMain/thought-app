@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, Sparkles } from 'lucide-react';
 import InfiniteScroll from './components/InfiniteScroll';
 import CreateThought from './components/CreateThought';
+import PWAInstallButton from './components/PWAInstallButton';
 import { Thought, CreateThoughtData } from './types';
 
 const App: React.FC = () => {
@@ -217,6 +218,8 @@ const App: React.FC = () => {
         onSubmit={handleCreateThought}
         onCancel={() => setShowCreateModal(false)}
       />
+      
+      <PWAInstallButton />
     </div>
   );
 };
